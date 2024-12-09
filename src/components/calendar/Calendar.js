@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import { format, addDays, subDays, startOfToday } from 'date-fns';
 import { useTaskContext } from '@/context/TaskContext';
+import DailyView from './DailyView';
 
 export default function Calendar() {
   const [selectedDate, setSelectedDate] = useState(startOfToday());
@@ -74,8 +75,8 @@ export default function Calendar() {
       </div>
 
       {/* Calendar Content */}
-      <div className="flex-1 bg-base-200 rounded-lg p-4">
-        {view === 'daily' && <p>Daily view coming soon...</p>}
+      <div className="flex-1 bg-base-200 rounded-lg p-4 overflow-hidden">
+        {view === 'daily' && <DailyView selectedDate={selectedDate} tasks={tasks} />}
         {view === 'weekly' && <p>Weekly view coming soon...</p>}
         {view === 'monthly' && <p>Monthly view coming soon...</p>}
       </div>
