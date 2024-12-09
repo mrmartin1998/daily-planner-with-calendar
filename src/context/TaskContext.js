@@ -4,9 +4,17 @@ import { loadTasks, saveTasks } from '@/utils/localStorage';
 
 const TaskContext = createContext(null);
 
+const DEFAULT_CATEGORIES = [
+  { id: '1', name: 'Work', color: '#FF5733' },
+  { id: '2', name: 'Personal', color: '#33FF57' },
+  { id: '3', name: 'Shopping', color: '#3357FF' },
+  { id: '4', name: 'Health', color: '#FF33F5' }
+];
+
 export function TaskProvider({ children }) {
   const [tasks, setTasks] = useState([]);
   const [editingTask, setEditingTask] = useState(null);
+  const [categories, setCategories] = useState(DEFAULT_CATEGORIES);
 
   // Load tasks from localStorage on mount
   useEffect(() => {
@@ -23,6 +31,7 @@ export function TaskProvider({ children }) {
     const newTask = {
       id: Date.now().toString(),
       ...formData,
+      categoryId: formData.categoryId || null,
       status: 'pending',
       createdAt: new Date(),
       updatedAt: new Date()
@@ -43,13 +52,33 @@ export function TaskProvider({ children }) {
     setTasks(prev => prev.filter(task => task.id !== taskId));
   };
 
+  const addCategory = (category) => {
+    setCategories(prev => [...prev, { 
+      id: Date.now().toString(),
+      ...category 
+    }]);
+  };
+
+  const deleteCategory = (categoryId) => {
+    setCategories(prev => prev.filter(cat => cat.id !== categoryId));
+    // Optional: Update tasks that had this category
+    setTasks(prev => prev.map(task => 
+      task.categoryId === categoryId 
+        ? { ...task, categoryId: null }
+        : task
+    ));
+  };
+
   const value = {
     tasks,
+    categories,
     editingTask,
     setEditingTask,
     createTask,
     updateTask,
-    deleteTask
+    deleteTask,
+    addCategory,
+    deleteCategory
   };
 
   return (

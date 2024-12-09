@@ -3,13 +3,15 @@ import { formatDistanceToNow } from 'date-fns';
 import { useTaskContext } from '@/context/TaskContext';
 
 export default function TaskCard({ task }) {
-  const { setEditingTask, deleteTask } = useTaskContext();
+  const { setEditingTask, deleteTask, categories } = useTaskContext();
   
   const priorityColors = {
     low: 'badge-success',
     medium: 'badge-warning',
     high: 'badge-error'
   };
+
+  const category = categories.find(c => c.id === task.categoryId);
 
   const handleEdit = () => {
     setEditingTask(task);
@@ -19,10 +21,17 @@ export default function TaskCard({ task }) {
   return (
     <div className="card bg-base-200 shadow-xl">
       <div className="card-body">
-        <div className="flex justify-between items-start">
+        <div className="flex justify-between items-start gap-2">
           <h3 className="card-title">{task.title}</h3>
-          <div className={`badge ${priorityColors[task.priority]}`}>
-            {task.priority}
+          <div className="flex gap-2">
+            {category && (
+              <div className="badge" style={{ backgroundColor: category.color, color: '#fff' }}>
+                {category.name}
+              </div>
+            )}
+            <div className={`badge ${priorityColors[task.priority]}`}>
+              {task.priority}
+            </div>
           </div>
         </div>
         

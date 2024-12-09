@@ -1,63 +1,43 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
+import CategorySelector from './CategorySelector';
 
-export default function TaskForm({ onSubmit, initialData = null }) {
-  const defaultFormData = {
-    id: '',
-    title: '',
-    description: '',
-    dueDate: '',
-    priority: 'low'
-  };
-
-  const [formData, setFormData] = useState(defaultFormData);
-
-  useEffect(() => {
-    if (initialData) {
-      setFormData({
-        id: initialData.id,
-        title: initialData.title,
-        description: initialData.description || '',
-        dueDate: new Date(initialData.dueDate).toISOString().split('T')[0],
-        priority: initialData.priority
-      });
-    } else {
-      setFormData(defaultFormData);
-    }
-  }, [initialData]);
+export default function TaskForm({ onSubmit, initialData }) {
+  const [formData, setFormData] = useState({
+    title: initialData?.title || '',
+    description: initialData?.description || '',
+    dueDate: initialData?.dueDate || '',
+    priority: initialData?.priority || 'medium',
+    categoryId: initialData?.categoryId || ''
+  });
 
   const handleSubmit = (e) => {
     e.preventDefault();
     onSubmit({
       ...formData,
-      dueDate: new Date(formData.dueDate)
+      id: initialData?.id
     });
-  };
-
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
   };
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
-      <div className="form-control">
+      <div className="form-control w-full">
         <label className="label">
-          <span className="label-text">Task Title</span>
+          <span className="label-text">Title</span>
         </label>
         <input
           type="text"
-          name="title"
-          value={formData.title}
-          onChange={handleChange}
-          placeholder="Enter task title"
           className="input input-bordered w-full"
+          value={formData.title}
+          onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
           required
         />
       </div>
+
+      <CategorySelector
+        value={formData.categoryId}
+        onChange={(value) => setFormData(prev => ({ ...prev, categoryId: value }))}
+      />
 
       <div className="form-control">
         <label className="label">
@@ -66,7 +46,7 @@ export default function TaskForm({ onSubmit, initialData = null }) {
         <textarea
           name="description"
           value={formData.description}
-          onChange={handleChange}
+          onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
           placeholder="Enter task description"
           className="textarea textarea-bordered h-24"
         />
@@ -81,7 +61,7 @@ export default function TaskForm({ onSubmit, initialData = null }) {
             type="date"
             name="dueDate"
             value={formData.dueDate}
-            onChange={handleChange}
+            onChange={(e) => setFormData(prev => ({ ...prev, dueDate: e.target.value }))}
             className="input input-bordered"
             required
           />
@@ -94,7 +74,7 @@ export default function TaskForm({ onSubmit, initialData = null }) {
           <select
             name="priority"
             value={formData.priority}
-            onChange={handleChange}
+            onChange={(e) => setFormData(prev => ({ ...prev, priority: e.target.value }))}
             className="select select-bordered w-full"
           >
             <option value="low">Low</option>
