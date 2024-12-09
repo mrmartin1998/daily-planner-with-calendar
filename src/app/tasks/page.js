@@ -25,6 +25,7 @@ export default function TasksPage() {
   };
 
   const openEditModal = (task) => {
+    console.log('Opening edit modal with task:', task);
     setEditingTask(task);
     document.getElementById('task-modal').showModal();
   };
@@ -57,9 +58,6 @@ export default function TasksPage() {
             initialData={editingTask} 
           />
         </div>
-        <form method="dialog" className="modal-backdrop">
-          <button>close</button>
-        </form>
       </dialog>
     </main>
   );

@@ -42,21 +42,28 @@ export function TaskProvider({ children }) {
       id: generateId(),
       title: taskData.title,
       description: taskData.description,
-      dueDate: taskData.dueDate,
+      dueDate: new Date(`${taskData.dueDate}T${taskData.dueTime}`),
       categoryId: taskData.categoryId,
-      priority: taskData.priority || 'low',
+      priority: taskData.priority,
       status: 'pending',
       createdAt: new Date(),
       updatedAt: new Date(),
     };
-
     setTasks(prev => [...prev, newTask]);
   };
 
-  const updateTask = (formData) => {
+  const updateTask = (taskData) => {
     setTasks(prev => prev.map(task => 
-      task.id === formData.id 
-        ? { ...task, ...formData, updatedAt: new Date() } 
+      task.id === taskData.id 
+        ? {
+            ...task,
+            title: taskData.title,
+            description: taskData.description,
+            dueDate: new Date(`${taskData.dueDate}T${taskData.dueTime}`),
+            categoryId: taskData.categoryId,
+            priority: taskData.priority,
+            updatedAt: new Date()
+          }
         : task
     ));
   };

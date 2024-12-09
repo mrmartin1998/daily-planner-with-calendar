@@ -1,19 +1,41 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useTaskContext } from '@/context/TaskContext';
 import { format } from 'date-fns';
 import CategorySelector from './CategorySelector';
 
+const defaultFormData = {
+  id: '',
+  title: '',
+  description: '',
+  dueDate: format(new Date(), 'yyyy-MM-dd'),
+  dueTime: format(new Date(), 'HH:mm'),
+  priority: 'low',
+  categoryId: '',
+};
+
 export default function TaskForm({ onSubmit, initialData = null }) {
   const { categories } = useTaskContext();
-  const [formData, setFormData] = useState({
-    title: initialData?.title || '',
-    description: initialData?.description || '',
-    dueDate: initialData?.dueDate ? format(new Date(initialData.dueDate), 'yyyy-MM-dd') : '',
-    dueTime: initialData?.dueTime || '',
-    priority: initialData?.priority || 'low',
-    categoryId: initialData?.categoryId || '',
-  });
+  const [formData, setFormData] = useState(defaultFormData);
+
+  useEffect(() => {
+    if (initialData) {
+      // Edit mode
+      const taskDate = new Date(initialData.dueDate);
+      setFormData({
+        id: initialData.id,
+        title: initialData.title || '',
+        description: initialData.description || '',
+        dueDate: format(taskDate, 'yyyy-MM-dd'),
+        dueTime: format(taskDate, 'HH:mm'),
+        priority: initialData.priority || 'low',
+        categoryId: initialData.categoryId || '',
+      });
+    } else {
+      // Create mode - reset to defaults
+      setFormData(defaultFormData);
+    }
+  }, [initialData]);
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -104,8 +126,18 @@ export default function TaskForm({ onSubmit, initialData = null }) {
         </div>
       </div>
 
-      <div className="modal-action">
-        <button type="submit" className="btn btn-primary">
+      <div className="flex justify-end gap-2 mt-6">
+        <button 
+          type="button" 
+          className="btn" 
+          onClick={() => document.getElementById('task-modal').close()}
+        >
+          Cancel
+        </button>
+        <button 
+          type="submit" 
+          className="btn btn-primary"
+        >
           {initialData ? 'Update Task' : 'Create Task'}
         </button>
       </div>
