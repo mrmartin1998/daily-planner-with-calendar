@@ -1,5 +1,5 @@
 'use client';
-import { formatDistanceToNow } from 'date-fns';
+import { formatDistanceToNow, format } from 'date-fns';
 import { useTaskContext } from '@/context/TaskContext';
 
 export default function TaskCard({ task, onEdit, onDelete }) {
@@ -9,6 +9,17 @@ export default function TaskCard({ task, onEdit, onDelete }) {
     low: 'badge-success',
     medium: 'badge-warning',
     high: 'badge-error'
+  };
+
+  const formatDueDate = (date) => {
+    if (!date) return 'No due date';
+    try {
+      const dateObj = new Date(date);
+      if (isNaN(dateObj.getTime())) return 'No due date';
+      return formatDistanceToNow(dateObj, { addSuffix: true });
+    } catch {
+      return 'No due date';
+    }
   };
 
   const category = categories.find(c => c.id === task.categoryId);
@@ -36,7 +47,7 @@ export default function TaskCard({ task, onEdit, onDelete }) {
         
         <div className="flex justify-between items-center mt-4">
           <span className="text-sm">
-            Due {formatDistanceToNow(new Date(task.dueDate), { addSuffix: true })}
+            Due {formatDueDate(task.dueDate)}
           </span>
           <div className="card-actions justify-end">
             <button className="btn btn-square btn-sm" onClick={() => onEdit(task)}>

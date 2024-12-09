@@ -42,12 +42,12 @@ export function TaskProvider({ children }) {
       id: generateId(),
       title: taskData.title,
       description: taskData.description,
-      dueDate: new Date(`${taskData.dueDate}T${taskData.dueTime}`),
+      dueDate: taskData.dueDate,
       categoryId: taskData.categoryId,
       priority: taskData.priority,
       status: 'pending',
-      createdAt: new Date(),
-      updatedAt: new Date(),
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
     };
     setTasks(prev => [...prev, newTask]);
   };
@@ -59,10 +59,10 @@ export function TaskProvider({ children }) {
             ...task,
             title: taskData.title,
             description: taskData.description,
-            dueDate: new Date(`${taskData.dueDate}T${taskData.dueTime}`),
+            dueDate: taskData.dueDate,
             categoryId: taskData.categoryId,
             priority: taskData.priority,
-            updatedAt: new Date()
+            updatedAt: new Date().toISOString()
           }
         : task
     ));

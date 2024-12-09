@@ -1,7 +1,7 @@
 'use client';
 import { useState, useEffect } from 'react';
 import { useTaskContext } from '@/context/TaskContext';
-import { format } from 'date-fns';
+import { format, isValid, parseISO } from 'date-fns';
 import CategorySelector from './CategorySelector';
 
 const defaultFormData = {
@@ -20,19 +20,26 @@ export default function TaskForm({ onSubmit, initialData = null }) {
 
   useEffect(() => {
     if (initialData) {
-      // Edit mode
-      const taskDate = new Date(initialData.dueDate);
+      let date;
+      try {
+        date = initialData.dueDate ? new Date(initialData.dueDate) : new Date();
+        if (isNaN(date.getTime())) {
+          date = new Date();
+        }
+      } catch (error) {
+        date = new Date();
+      }
+
       setFormData({
-        id: initialData.id,
+        id: initialData.id || '',
         title: initialData.title || '',
         description: initialData.description || '',
-        dueDate: format(taskDate, 'yyyy-MM-dd'),
-        dueTime: format(taskDate, 'HH:mm'),
+        dueDate: format(date, 'yyyy-MM-dd'),
+        dueTime: format(date, 'HH:mm'),
         priority: initialData.priority || 'low',
         categoryId: initialData.categoryId || '',
       });
     } else {
-      // Create mode - reset to defaults
       setFormData(defaultFormData);
     }
   }, [initialData]);
@@ -40,11 +47,13 @@ export default function TaskForm({ onSubmit, initialData = null }) {
   const handleSubmit = (e) => {
     e.preventDefault();
     
+    const dateString = formData.dueTime 
+      ? `${formData.dueDate}T${formData.dueTime}:00.000Z`
+      : `${formData.dueDate}T00:00:00.000Z`;
+
     onSubmit({
       ...formData,
-      dueDate: formData.dueDate && formData.dueTime
-        ? new Date(`${formData.dueDate}T${formData.dueTime}`)
-        : new Date(formData.dueDate)
+      dueDate: dateString
     });
   };
 
