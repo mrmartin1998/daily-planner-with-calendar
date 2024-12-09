@@ -1,4 +1,6 @@
 import localFont from "next/font/local";
+import Header from "@/components/layout/Header";
+import Sidebar from "@/components/layout/Sidebar";
 import "./globals.css";
 
 const geistSans = localFont({
@@ -21,7 +23,16 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en" data-theme="dark">
       <body className={`${geistSans.variable} antialiased`}>
-        {children}
+        <div className="min-h-screen bg-base-100">
+          <div className="drawer lg:drawer-open">
+            <input id="my-drawer-2" type="checkbox" className="drawer-toggle" />
+            <div className="drawer-content flex flex-col">
+              <Header />
+              {children}
+            </div>
+            <Sidebar />
+          </div>
+        </div>
       </body>
     </html>
   );
