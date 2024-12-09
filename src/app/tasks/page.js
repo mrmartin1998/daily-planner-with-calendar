@@ -1,48 +1,27 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { useTaskContext } from '@/context/TaskContext';
 import TaskList from '@/components/tasks/TaskList';
 import TaskForm from '@/components/tasks/TaskForm';
-import { loadTasks, saveTasks } from '@/utils/localStorage';
 
 export default function TasksPage() {
-  const [tasks, setTasks] = useState([]);
-  const [editingTask, setEditingTask] = useState(null);
-
-  // Load tasks from localStorage on component mount
-  useEffect(() => {
-    const storedTasks = loadTasks();
-    setTasks(storedTasks);
-  }, []);
-
-  // Save tasks to localStorage whenever they change
-  useEffect(() => {
-    saveTasks(tasks);
-  }, [tasks]);
+  const { 
+    tasks, 
+    editingTask, 
+    setEditingTask, 
+    createTask, 
+    updateTask, 
+    deleteTask 
+  } = useTaskContext();
 
   const handleCreateTask = (formData) => {
-    const newTask = {
-      id: Date.now().toString(),
-      ...formData,
-      status: 'pending',
-      createdAt: new Date(),
-      updatedAt: new Date()
-    };
-    setTasks(prev => [...prev, newTask]);
+    createTask(formData);
     document.getElementById('task-modal').close();
   };
 
   const handleEditTask = (formData) => {
-    setTasks(prev => prev.map(task => 
-      task.id === formData.id 
-        ? { ...task, ...formData, updatedAt: new Date() } 
-        : task
-    ));
+    updateTask(formData);
     setEditingTask(null);
     document.getElementById('task-modal').close();
-  };
-
-  const handleDeleteTask = (taskId) => {
-    setTasks(prev => prev.filter(task => task.id !== taskId));
   };
 
   const openEditModal = (task) => {
@@ -68,7 +47,7 @@ export default function TasksPage() {
         </button>
       </div>
       
-      <TaskList tasks={tasks} onEdit={openEditModal} onDelete={handleDeleteTask} />
+      <TaskList tasks={tasks} onEdit={openEditModal} onDelete={deleteTask} />
 
       <dialog id="task-modal" className="modal">
         <div className="modal-box">

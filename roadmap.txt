@@ -15,8 +15,8 @@ Daily Planner with Calendar View - Learning Roadmap
 
 3. State Management and Data Structure
    - Define task data structure ✓
-   - Implement local storage utilities ⏳
-   - Create context for global state management ⏳
+   - Implement local storage utilities ✓
+   - Create context for global state management ✓
    - Design category system ⏳
 
 4. Core Features Implementation
@@ -59,8 +59,8 @@ Learning Objectives:
    - Custom hooks ⏳
 
 2. Local Storage
-   - Reading and writing data ⏳
-   - Data persistence ⏳
+   - Reading and writing data ✓
+   - Data persistence ✓
    - Storage optimization ⏳
 
 3. UI/UX Design
