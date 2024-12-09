@@ -1,53 +1,60 @@
 'use client';
-import { format, isSameDay } from 'date-fns';
+import { format, isSameDay, parseISO } from 'date-fns';
+import { useTaskContext } from '@/context/TaskContext';
 
 export default function DailyView({ selectedDate, tasks }) {
-  // Generate array of hours (0-23)
+  const { categories } = useTaskContext();
   const hours = Array.from({ length: 24 }, (_, i) => i);
   
-  // Filter tasks for the selected date
   const dailyTasks = tasks.filter(task => 
-    isSameDay(new Date(task.dueDate), selectedDate)
+    isSameDay(parseISO(task.dueDate), selectedDate)
   );
 
-  return (
-    <div className="h-full overflow-auto">
-      <div className="grid grid-cols-[60px_1fr] gap-2">
-        {/* Time labels */}
-        <div className="space-y-8">
-          {hours.map(hour => (
-            <div key={hour} className="text-sm text-base-content/70 text-right pr-2 pt-2 sticky left-0">
-              {format(new Date().setHours(hour), 'ha')}
-            </div>
-          ))}
-        </div>
+  const getTaskCategory = (categoryId) => {
+    return categories.find(c => c.id === categoryId);
+  };
 
-        {/* Time slots */}
-        <div className="relative">
-          {/* Hour grid lines */}
-          {hours.map(hour => (
-            <div 
-              key={hour}
-              className="h-10 border-t border-base-content/10 relative"
-            >
-              {/* Task cards will go here */}
-              {dailyTasks
-                .filter(task => new Date(task.dueDate).getHours() === hour)
-                .map(task => (
+  return (
+    <div className="grid grid-cols-[80px_1fr] gap-2">
+      {/* Time labels */}
+      <div className="space-y-8">
+        {hours.map(hour => (
+          <div key={hour} className="text-sm text-base-content/70 text-right pr-2 pt-2 h-20">
+            {format(new Date().setHours(hour), 'ha')}
+          </div>
+        ))}
+      </div>
+
+      {/* Time slots */}
+      <div className="relative">
+        {hours.map(hour => (
+          <div 
+            key={hour}
+            className="h-20 border-t border-base-content/10 relative group"
+          >
+            {dailyTasks
+              .filter(task => new Date(task.dueDate).getHours() === hour)
+              .map(task => {
+                const category = getTaskCategory(task.categoryId);
+                return (
                   <div
                     key={task.id}
-                    className="absolute w-full bg-primary/10 rounded p-2 border border-primary/20"
-                    style={{ top: '0' }}
+                    className="absolute w-[95%] rounded-lg p-2 shadow-md"
+                    style={{ 
+                      top: '4px',
+                      backgroundColor: category ? `${category.color}20` : 'hsl(var(--p) / 0.1)',
+                      borderLeft: category ? `3px solid ${category.color}` : '3px solid hsl(var(--p))'
+                    }}
                   >
-                    <h4 className="font-medium text-sm">{task.title}</h4>
+                    <h4 className="font-medium text-sm truncate">{task.title}</h4>
                     <p className="text-xs text-base-content/70">
-                      {format(new Date(task.dueDate), 'h:mm a')}
+                      {format(parseISO(task.dueDate), 'h:mm a')}
                     </p>
                   </div>
-                ))}
-            </div>
-          ))}
-        </div>
+                );
+              })}
+          </div>
+        ))}
       </div>
     </div>
   );
