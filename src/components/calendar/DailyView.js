@@ -19,7 +19,7 @@ export default function DailyView({ selectedDate, tasks }) {
       {/* Time labels */}
       <div className="space-y-8">
         {hours.map(hour => (
-          <div key={hour} className="text-sm text-base-content/70 text-right pr-2 pt-2 h-20">
+          <div key={`label-${hour}`} className="text-sm text-base-content/70 text-right pr-2 pt-2 h-20">
             {format(new Date().setHours(hour), 'ha')}
           </div>
         ))}
@@ -29,16 +29,16 @@ export default function DailyView({ selectedDate, tasks }) {
       <div className="relative">
         {hours.map(hour => (
           <div 
-            key={hour}
+            key={`slot-${hour}`}
             className="h-20 border-t border-base-content/10 relative group"
           >
             {dailyTasks
               .filter(task => new Date(task.dueDate).getHours() === hour)
-              .map(task => {
+              .map((task, index) => {
                 const category = getTaskCategory(task.categoryId);
                 return (
                   <div
-                    key={task.id}
+                    key={`${task.id}-${hour}-${index}`}
                     className="absolute w-[95%] rounded-lg p-2 shadow-md"
                     style={{ 
                       top: '4px',

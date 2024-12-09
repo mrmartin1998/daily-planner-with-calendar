@@ -13,9 +13,9 @@ export default function TaskList({ tasks, onEdit, onDelete }) {
 
   return (
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-      {tasks.map(task => (
+      {tasks.map((task, index) => (
         <TaskCard 
-          key={task.id}
+          key={`${task.id}-${index}`}
           task={task}
           onEdit={onEdit}
           onDelete={onDelete}
