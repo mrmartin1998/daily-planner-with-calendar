@@ -27,6 +27,8 @@ export default function TasksPage() {
     }
   ]);
 
+  const [editingTask, setEditingTask] = useState(null);
+
   const handleCreateTask = (formData) => {
     const newTask = {
       id: Date.now().toString(),
@@ -37,6 +39,16 @@ export default function TasksPage() {
     };
     setTasks(prev => [...prev, newTask]);
     document.getElementById('task-modal').close();
+  };
+
+  const handleEditTask = (formData) => {
+    setTasks(prev => prev.map(task => task.id === formData.id ? { ...task, ...formData, updatedAt: new Date() } : task));
+    setEditingTask(null);
+    document.getElementById('task-modal').close();
+  };
+
+  const handleDeleteTask = (taskId) => {
+    setTasks(prev => prev.filter(task => task.id !== taskId));
   };
 
   return (
@@ -51,12 +63,12 @@ export default function TasksPage() {
         </button>
       </div>
       
-      <TaskList tasks={tasks} />
+      <TaskList tasks={tasks} onEdit={setEditingTask} onDelete={handleDeleteTask} />
 
       <dialog id="task-modal" className="modal">
         <div className="modal-box">
-          <h3 className="font-bold text-lg mb-4">Create New Task</h3>
-          <TaskForm onSubmit={handleCreateTask} />
+          <h3 className="font-bold text-lg mb-4">{editingTask ? 'Edit Task' : 'Create New Task'}</h3>
+          <TaskForm onSubmit={editingTask ? handleEditTask : handleCreateTask} initialData={editingTask} />
         </div>
         <form method="dialog" className="modal-backdrop">
           <button>close</button>
