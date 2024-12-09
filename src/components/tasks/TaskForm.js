@@ -1,13 +1,30 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 export default function TaskForm({ onSubmit, initialData = null }) {
-  const [formData, setFormData] = useState({
-    title: initialData?.title || '',
-    description: initialData?.description || '',
-    dueDate: initialData?.dueDate ? new Date(initialData.dueDate).toISOString().split('T')[0] : '',
-    priority: initialData?.priority || 'low'
-  });
+  const defaultFormData = {
+    id: '',
+    title: '',
+    description: '',
+    dueDate: '',
+    priority: 'low'
+  };
+
+  const [formData, setFormData] = useState(defaultFormData);
+
+  useEffect(() => {
+    if (initialData) {
+      setFormData({
+        id: initialData.id,
+        title: initialData.title,
+        description: initialData.description || '',
+        dueDate: new Date(initialData.dueDate).toISOString().split('T')[0],
+        priority: initialData.priority
+      });
+    } else {
+      setFormData(defaultFormData);
+    }
+  }, [initialData]);
 
   const handleSubmit = (e) => {
     e.preventDefault();
