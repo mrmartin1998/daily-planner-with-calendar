@@ -1,10 +1,7 @@
 'use client';
-import { useTaskContext } from '@/context/TaskContext';
 import TaskCard from './TaskCard';
 
-export default function TaskList() {
-  const { tasks } = useTaskContext();
-
+export default function TaskList({ tasks, onEdit, onDelete }) {
   if (tasks.length === 0) {
     return (
       <div className="text-center p-8 bg-base-200 rounded-lg">
@@ -17,7 +14,12 @@ export default function TaskList() {
   return (
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
       {tasks.map(task => (
-        <TaskCard key={task.id} task={task} />
+        <TaskCard 
+          key={task.id}
+          task={task}
+          onEdit={onEdit}
+          onDelete={onDelete}
+        />
       ))}
     </div>
   );

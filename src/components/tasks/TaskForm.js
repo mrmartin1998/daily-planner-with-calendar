@@ -1,15 +1,30 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import CategorySelector from './CategorySelector';
 
 export default function TaskForm({ onSubmit, initialData }) {
   const [formData, setFormData] = useState({
-    title: initialData?.title || '',
-    description: initialData?.description || '',
-    dueDate: initialData?.dueDate || '',
-    priority: initialData?.priority || 'medium',
-    categoryId: initialData?.categoryId || ''
+    title: '',
+    description: '',
+    dueDate: '',
+    priority: 'medium',
+    categoryId: ''
   });
+
+  // Reset form when initialData changes (including when it becomes null)
+  useEffect(() => {
+    if (initialData) {
+      setFormData(initialData);
+    } else {
+      setFormData({
+        title: '',
+        description: '',
+        dueDate: '',
+        priority: 'medium',
+        categoryId: ''
+      });
+    }
+  }, [initialData]);
 
   const handleSubmit = (e) => {
     e.preventDefault();

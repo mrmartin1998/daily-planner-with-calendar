@@ -1,6 +1,6 @@
 'use client';
 import { createContext, useContext, useState, useEffect } from 'react';
-import { loadTasks, saveTasks } from '@/utils/localStorage';
+import { loadTasks, saveTasks, loadCategories, saveCategories } from '@/utils/localStorage';
 
 const TaskContext = createContext(null);
 
@@ -16,16 +16,22 @@ export function TaskProvider({ children }) {
   const [editingTask, setEditingTask] = useState(null);
   const [categories, setCategories] = useState(DEFAULT_CATEGORIES);
 
-  // Load tasks from localStorage on mount
+  // Load data from localStorage on mount
   useEffect(() => {
     const storedTasks = loadTasks();
+    const storedCategories = loadCategories();
     setTasks(storedTasks);
+    setCategories(storedCategories.length ? storedCategories : DEFAULT_CATEGORIES);
   }, []);
 
-  // Save tasks to localStorage when they change
+  // Save data to localStorage when it changes
   useEffect(() => {
     saveTasks(tasks);
   }, [tasks]);
+
+  useEffect(() => {
+    saveCategories(categories);
+  }, [categories]);
 
   const createTask = (formData) => {
     const newTask = {
@@ -36,6 +42,7 @@ export function TaskProvider({ children }) {
       createdAt: new Date(),
       updatedAt: new Date()
     };
+    console.log('New task created:', newTask);
     setTasks(prev => [...prev, newTask]);
     return newTask;
   };
