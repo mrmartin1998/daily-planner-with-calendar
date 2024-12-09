@@ -1,33 +1,23 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import TaskList from '@/components/tasks/TaskList';
 import TaskForm from '@/components/tasks/TaskForm';
+import { loadTasks, saveTasks } from '@/utils/localStorage';
 
 export default function TasksPage() {
-  const [tasks, setTasks] = useState([
-    {
-      id: '1',
-      title: 'Complete Project Proposal',
-      description: 'Write and submit the project proposal for the new client',
-      dueDate: new Date('2024-03-20'),
-      priority: 'high',
-      status: 'pending',
-      createdAt: new Date(),
-      updatedAt: new Date()
-    },
-    {
-      id: '2',
-      title: 'Team Meeting',
-      description: 'Weekly team sync to discuss project progress',
-      dueDate: new Date('2024-03-15'),
-      priority: 'medium',
-      status: 'pending',
-      createdAt: new Date(),
-      updatedAt: new Date()
-    }
-  ]);
-
+  const [tasks, setTasks] = useState([]);
   const [editingTask, setEditingTask] = useState(null);
+
+  // Load tasks from localStorage on component mount
+  useEffect(() => {
+    const storedTasks = loadTasks();
+    setTasks(storedTasks);
+  }, []);
+
+  // Save tasks to localStorage whenever they change
+  useEffect(() => {
+    saveTasks(tasks);
+  }, [tasks]);
 
   const handleCreateTask = (formData) => {
     const newTask = {
