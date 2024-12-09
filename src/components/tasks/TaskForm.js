@@ -1,36 +1,28 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
+import { useTaskContext } from '@/context/TaskContext';
+import { format } from 'date-fns';
 import CategorySelector from './CategorySelector';
 
-export default function TaskForm({ onSubmit, initialData }) {
+export default function TaskForm({ onSubmit, initialData = null }) {
+  const { categories } = useTaskContext();
   const [formData, setFormData] = useState({
-    title: '',
-    description: '',
-    dueDate: '',
-    priority: 'medium',
-    categoryId: ''
+    title: initialData?.title || '',
+    description: initialData?.description || '',
+    dueDate: initialData?.dueDate ? format(new Date(initialData.dueDate), 'yyyy-MM-dd') : '',
+    dueTime: initialData?.dueTime || '',
+    priority: initialData?.priority || 'low',
+    categoryId: initialData?.categoryId || '',
   });
-
-  // Reset form when initialData changes (including when it becomes null)
-  useEffect(() => {
-    if (initialData) {
-      setFormData(initialData);
-    } else {
-      setFormData({
-        title: '',
-        description: '',
-        dueDate: '',
-        priority: 'medium',
-        categoryId: ''
-      });
-    }
-  }, [initialData]);
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    
     onSubmit({
       ...formData,
-      id: initialData?.id
+      dueDate: formData.dueDate && formData.dueTime
+        ? new Date(`${formData.dueDate}T${formData.dueTime}`)
+        : new Date(formData.dueDate)
     });
   };
 
@@ -79,6 +71,19 @@ export default function TaskForm({ onSubmit, initialData }) {
             onChange={(e) => setFormData(prev => ({ ...prev, dueDate: e.target.value }))}
             className="input input-bordered"
             required
+          />
+        </div>
+
+        <div className="form-control">
+          <label className="label">
+            <span className="label-text">Due Time</span>
+          </label>
+          <input
+            type="time"
+            name="dueTime"
+            value={formData.dueTime}
+            onChange={(e) => setFormData(prev => ({ ...prev, dueTime: e.target.value }))}
+            className="input input-bordered"
           />
         </div>
 

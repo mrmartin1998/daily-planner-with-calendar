@@ -3,6 +3,7 @@ const task = {
     title: '',
     description: '',
     dueDate: new Date(),
+    dueTime: '',
     priority: 'low', // 'low', 'medium', 'high'
     status: 'pending', // 'pending', 'in-progress', 'completed'
     category: '',

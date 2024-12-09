@@ -11,6 +11,10 @@ const DEFAULT_CATEGORIES = [
   { id: '4', name: 'Health', color: '#FF33F5' }
 ];
 
+const generateId = () => {
+  return Date.now().toString(36) + Math.random().toString(36).substr(2);
+};
+
 export function TaskProvider({ children }) {
   const [tasks, setTasks] = useState([]);
   const [editingTask, setEditingTask] = useState(null);
@@ -33,18 +37,20 @@ export function TaskProvider({ children }) {
     saveCategories(categories);
   }, [categories]);
 
-  const createTask = (formData) => {
+  const createTask = (taskData) => {
     const newTask = {
-      id: Date.now().toString(),
-      ...formData,
-      categoryId: formData.categoryId || null,
+      id: generateId(),
+      title: taskData.title,
+      description: taskData.description,
+      dueDate: taskData.dueDate,
+      categoryId: taskData.categoryId,
+      priority: taskData.priority || 'low',
       status: 'pending',
       createdAt: new Date(),
-      updatedAt: new Date()
+      updatedAt: new Date(),
     };
-    console.log('New task created:', newTask);
+
     setTasks(prev => [...prev, newTask]);
-    return newTask;
   };
 
   const updateTask = (formData) => {
