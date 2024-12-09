@@ -10,21 +10,21 @@ Daily Planner with Calendar View - Learning Roadmap
    - Task form component ✓
    - Task list component ✓
    - Task card component ✓
-   - Category selector component ⏳
+   - Category selector component ✓
    - Reminder form component ⏳
 
 3. State Management and Data Structure
    - Define task data structure ✓
    - Implement local storage utilities ✓
    - Create context for global state management ✓
-   - Design category system ⏳
+   - Design category system ✓
 
 4. Core Features Implementation
    a. Task Management
       - Create task functionality ✓
       - Edit task functionality ✓
       - Delete task functionality ✓
-      - Task categorization ⏳
+      - Task categorization ✓
    
    b. Calendar Implementation
       - Daily view ⏳
@@ -40,7 +40,7 @@ Daily Planner with Calendar View - Learning Roadmap
 5. Styling and UI/UX
    - Implement Tailwind CSS styling ✓
    - Add DaisyUI components ✓
-   - Create color scheme for categories ⏳
+   - Create color scheme for categories ✓
    - Responsive design implementation ✓
    - Dark/Light mode support ⏳
 
