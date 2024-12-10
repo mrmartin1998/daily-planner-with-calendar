@@ -4,17 +4,23 @@ import { format, addDays, subDays, startOfToday } from 'date-fns';
 import { useTaskContext } from '@/context/TaskContext';
 import DailyView from './DailyView';
 import WeekView from './WeekView';
-
+import MonthView from './MonthView';
 export default function Calendar() {
   const [selectedDate, setSelectedDate] = useState(startOfToday());
   const [view, setView] = useState('daily'); // daily, weekly, monthly
   const { tasks } = useTaskContext();
 
   const navigateDate = (direction) => {
+    const amount = {
+      daily: 1,
+      weekly: 7,
+      monthly: 30
+    }[view] || 1;
+
     if (direction === 'prev') {
-      setSelectedDate(prev => subDays(prev, 1));
+      setSelectedDate(prev => subDays(prev, amount));
     } else if (direction === 'next') {
-      setSelectedDate(prev => addDays(prev, 1));
+      setSelectedDate(prev => addDays(prev, amount));
     } else if (direction === 'today') {
       setSelectedDate(startOfToday());
     }
@@ -79,7 +85,7 @@ export default function Calendar() {
       <div className="flex-1 bg-base-200 rounded-lg p-4 overflow-hidden">
         {view === 'daily' && <DailyView selectedDate={selectedDate} tasks={tasks} />}
         {view === 'weekly' && <WeekView selectedDate={selectedDate} tasks={tasks} />}
-        {view === 'monthly' && <p>Monthly view coming soon...</p>}
+        {view === 'monthly' && <MonthView selectedDate={selectedDate} tasks={tasks} />}
       </div>
     </div>
   );
