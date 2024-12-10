@@ -1,28 +1,55 @@
 'use client';
 import { useState } from 'react';
-import { format, addDays, subDays, startOfToday } from 'date-fns';
+import { 
+  format, 
+  addDays, 
+  subDays, 
+  addWeeks,
+  subWeeks,
+  addMonths,
+  subMonths,
+  startOfToday 
+} from 'date-fns';
 import { useTaskContext } from '@/context/TaskContext';
 import DailyView from './DailyView';
 import WeekView from './WeekView';
 import MonthView from './MonthView';
+
 export default function Calendar() {
   const [selectedDate, setSelectedDate] = useState(startOfToday());
-  const [view, setView] = useState('daily'); // daily, weekly, monthly
+  const [view, setView] = useState('daily');
   const { tasks } = useTaskContext();
 
   const navigateDate = (direction) => {
-    const amount = {
-      daily: 1,
-      weekly: 7,
-      monthly: 30
-    }[view] || 1;
-
-    if (direction === 'prev') {
-      setSelectedDate(prev => subDays(prev, amount));
-    } else if (direction === 'next') {
-      setSelectedDate(prev => addDays(prev, amount));
-    } else if (direction === 'today') {
+    if (direction === 'today') {
       setSelectedDate(startOfToday());
+      return;
+    }
+
+    setSelectedDate(prev => {
+      switch (view) {
+        case 'daily':
+          return direction === 'prev' ? subDays(prev, 1) : addDays(prev, 1);
+        case 'weekly':
+          return direction === 'prev' ? subWeeks(prev, 1) : addWeeks(prev, 1);
+        case 'monthly':
+          return direction === 'prev' ? subMonths(prev, 1) : addMonths(prev, 1);
+        default:
+          return prev;
+      }
+    });
+  };
+
+  const getHeaderDate = () => {
+    switch (view) {
+      case 'daily':
+        return format(selectedDate, 'MMMM d, yyyy');
+      case 'weekly':
+        return `Week of ${format(selectedDate, 'MMMM d, yyyy')}`;
+      case 'monthly':
+        return format(selectedDate, 'MMMM yyyy');
+      default:
+        return format(selectedDate, 'MMMM d, yyyy');
     }
   };
 
@@ -56,7 +83,7 @@ export default function Calendar() {
         </div>
 
         <h3 className="text-xl font-semibold">
-          {format(selectedDate, 'MMMM d, yyyy')}
+          {getHeaderDate()}
         </h3>
 
         <div className="join">
@@ -83,9 +110,11 @@ export default function Calendar() {
 
       {/* Calendar Content */}
       <div className="flex-1 bg-base-200 rounded-lg p-4 overflow-hidden">
-        {view === 'daily' && <DailyView selectedDate={selectedDate} tasks={tasks} />}
-        {view === 'weekly' && <WeekView selectedDate={selectedDate} tasks={tasks} />}
-        {view === 'monthly' && <MonthView selectedDate={selectedDate} tasks={tasks} />}
+        <div className="transition-all duration-300 ease-in-out">
+          {view === 'daily' && <DailyView selectedDate={selectedDate} tasks={tasks} />}
+          {view === 'weekly' && <WeekView selectedDate={selectedDate} tasks={tasks} />}
+          {view === 'monthly' && <MonthView selectedDate={selectedDate} tasks={tasks} />}
+        </div>
       </div>
     </div>
   );
