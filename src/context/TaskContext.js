@@ -39,8 +39,11 @@ export function TaskProvider({ children }) {
   }, [categories]);
 
   useEffect(() => {
-    reminderService.startChecking(tasks);
-    return () => reminderService.stopChecking();
+    if (typeof window !== 'undefined') {
+      reminderService.stopChecking();
+      reminderService.startChecking(tasks);
+      return () => reminderService.stopChecking();
+    }
   }, [tasks]);
 
   const createTask = (taskData) => {
@@ -49,6 +52,8 @@ export function TaskProvider({ children }) {
       title: taskData.title,
       description: taskData.description,
       dueDate: taskData.dueDate,
+      dueTime: taskData.dueTime,
+      reminder: taskData.reminder,
       categoryId: taskData.categoryId,
       priority: taskData.priority,
       status: 'pending',

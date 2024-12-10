@@ -3,11 +3,15 @@ import { parseISO, isBefore, addMinutes } from 'date-fns';
 
 class ReminderService {
   constructor() {
-    this.checkPermission();
+    if (typeof window !== 'undefined') {
+      this.checkPermission();
+    }
     this.checkInterval = null;
   }
 
   async checkPermission() {
+    if (typeof window === 'undefined') return false;
+    
     if (!('Notification' in window)) {
       console.log('This browser does not support notifications');
       return false;
@@ -26,7 +30,10 @@ class ReminderService {
   }
 
   startChecking(tasks) {
-    // Check every minute
+    // Check immediately when tasks are added
+    this.checkReminders(tasks);
+    
+    // Then check every minute
     this.checkInterval = setInterval(() => {
       this.checkReminders(tasks);
     }, 60000);
@@ -40,13 +47,30 @@ class ReminderService {
 
   checkReminders(tasks) {
     const now = new Date();
+    console.log('🕒 Checking reminders at:', now.toLocaleString());
+    console.log('📋 Tasks with reminders:', tasks.filter(t => t.reminder).length);
+    
     tasks.forEach(task => {
       if (!task.reminder) return;
 
-      const dueDate = parseISO(task.dueDate);
-      const reminderTime = addMinutes(dueDate, -parseInt(task.reminder));
+      // Parse the date correctly
+      const fullDueDate = new Date(task.dueDate);
+      const [hours, minutes] = task.dueTime.split(':');
+      fullDueDate.setHours(parseInt(hours), parseInt(minutes), 0);
+      
+      const reminderTime = addMinutes(fullDueDate, -parseInt(task.reminder));
 
-      if (isBefore(reminderTime, now) && isBefore(now, dueDate)) {
+      console.log('📌 Task Details:', {
+        title: task.title,
+        dueDate: fullDueDate.toLocaleString(),
+        reminderTime: reminderTime.toLocaleString(),
+        currentTime: now.toLocaleString(),
+        timeUntilDue: (fullDueDate - now) / 1000 / 60, // minutes
+        timeUntilReminder: (reminderTime - now) / 1000 / 60 // minutes
+      });
+
+      if (isBefore(reminderTime, now) && isBefore(now, fullDueDate)) {
+        console.log('🔔 Triggering notification for:', task.title);
         this.showNotification(task);
       }
     });
