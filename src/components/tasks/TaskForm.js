@@ -12,6 +12,7 @@ const defaultFormData = {
   dueTime: format(new Date(), 'HH:mm'),
   priority: 'low',
   categoryId: '',
+  reminder: '',
 };
 
 export default function TaskForm({ onSubmit, initialData = null }) {
@@ -38,6 +39,7 @@ export default function TaskForm({ onSubmit, initialData = null }) {
         dueTime: format(date, 'HH:mm'),
         priority: initialData.priority || 'low',
         categoryId: initialData.categoryId || '',
+        reminder: initialData.reminder || '',
       });
     } else {
       setFormData(defaultFormData);
@@ -133,6 +135,25 @@ export default function TaskForm({ onSubmit, initialData = null }) {
             <option value="high">High</option>
           </select>
         </div>
+      </div>
+
+      <div className="form-control">
+        <label className="label">
+          <span className="label-text">Reminder</span>
+        </label>
+        <select
+          name="reminder"
+          value={formData.reminder}
+          onChange={(e) => setFormData(prev => ({ ...prev, reminder: e.target.value }))}
+          className="select select-bordered w-full"
+        >
+          <option value="">No reminder</option>
+          <option value="5">5 minutes before</option>
+          <option value="15">15 minutes before</option>
+          <option value="30">30 minutes before</option>
+          <option value="60">1 hour before</option>
+          <option value="1440">1 day before</option>
+        </select>
       </div>
 
       <div className="flex justify-end gap-2 mt-6">

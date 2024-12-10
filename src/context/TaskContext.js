@@ -1,6 +1,7 @@
 'use client';
 import { createContext, useContext, useState, useEffect } from 'react';
 import { loadTasks, saveTasks, loadCategories, saveCategories } from '@/utils/localStorage';
+import { reminderService } from '@/services/ReminderService';
 
 const TaskContext = createContext(null);
 
@@ -36,6 +37,11 @@ export function TaskProvider({ children }) {
   useEffect(() => {
     saveCategories(categories);
   }, [categories]);
+
+  useEffect(() => {
+    reminderService.startChecking(tasks);
+    return () => reminderService.stopChecking();
+  }, [tasks]);
 
   const createTask = (taskData) => {
     const newTask = {
