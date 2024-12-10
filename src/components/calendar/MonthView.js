@@ -9,7 +9,10 @@ import {
   isSameMonth,
   isSameDay,
   parseISO,
-  isValid 
+  isValid,
+  isPast,
+  addMinutes,
+  isWithinInterval
 } from 'date-fns';
 import { useTaskContext } from '@/context/TaskContext';
 
@@ -30,6 +33,24 @@ export default function MonthView({ selectedDate, tasks }) {
       const taskDate = parseISO(task.dueDate);
       return isValid(taskDate) && isSameDay(taskDate, date);
     });
+  };
+
+  const getTaskStatus = (task) => {
+    const now = new Date();
+    const dueDate = parseISO(task.dueDate);
+    
+    if (isPast(dueDate)) {
+      return 'overdue';
+    }
+
+    if (task.reminder) {
+      const reminderTime = addMinutes(dueDate, -parseInt(task.reminder));
+      if (isWithinInterval(now, { start: reminderTime, end: dueDate })) {
+        return 'upcoming';
+      }
+    }
+
+    return 'normal';
   };
 
   return (
@@ -60,16 +81,21 @@ export default function MonthView({ selectedDate, tasks }) {
             <div className="space-y-1">
               {dayTasks.slice(0, 3).map(task => {
                 const category = categories.find(c => c.id === task.categoryId);
+                const status = getTaskStatus(task);
                 return (
                   <div
                     key={task.id}
-                    className="text-xs truncate rounded px-1 py-0.5"
+                    className={`text-xs truncate rounded px-1 py-0.5 flex items-center gap-1
+                      ${status === 'overdue' ? 'border-error border' : ''}
+                      ${status === 'upcoming' ? 'border-warning border' : ''}
+                    `}
                     style={{
                       backgroundColor: category ? `${category.color}20` : 'hsl(var(--p) / 0.1)',
                       borderLeft: category ? `2px solid ${category.color}` : '2px solid hsl(var(--p))'
                     }}
                   >
-                    {task.title}
+                    <span>{task.title}</span>
+                    {task.reminder && <span className="text-warning text-[10px]">⏰</span>}
                   </div>
                 );
               })}

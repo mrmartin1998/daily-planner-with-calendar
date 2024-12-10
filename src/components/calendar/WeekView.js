@@ -1,14 +1,21 @@
 'use client';
-import { format, startOfWeek, addDays, isSameDay, parseISO, isValid } from 'date-fns';
+import { 
+  format, 
+  startOfWeek, 
+  addDays, 
+  isSameDay, 
+  parseISO, 
+  isValid,
+  isPast,
+  addMinutes,
+  isWithinInterval 
+} from 'date-fns';
 import { useTaskContext } from '@/context/TaskContext';
 
 export default function WeekView({ selectedDate, tasks }) {
   const { categories } = useTaskContext();
   
-  // Get the start of the week from selected date
-  const weekStart = startOfWeek(selectedDate, { weekStartsOn: 1 }); // Start on Monday
-  
-  // Create array of dates for the week
+  const weekStart = startOfWeek(selectedDate, { weekStartsOn: 1 });
   const weekDates = Array.from({ length: 7 }, (_, i) => addDays(weekStart, i));
 
   const getTaskCategory = (categoryId) => {
@@ -20,6 +27,24 @@ export default function WeekView({ selectedDate, tasks }) {
       const taskDate = parseISO(task.dueDate);
       return isValid(taskDate) && isSameDay(taskDate, date);
     });
+  };
+
+  const getTaskStatus = (task) => {
+    const now = new Date();
+    const dueDate = parseISO(task.dueDate);
+    
+    if (isPast(dueDate)) {
+      return 'overdue';
+    }
+
+    if (task.reminder) {
+      const reminderTime = addMinutes(dueDate, -parseInt(task.reminder));
+      if (isWithinInterval(now, { start: reminderTime, end: dueDate })) {
+        return 'upcoming';
+      }
+    }
+
+    return 'normal';
   };
 
   return (
@@ -36,16 +61,23 @@ export default function WeekView({ selectedDate, tasks }) {
           <div className="flex-1 bg-base-100 rounded-lg p-2 overflow-y-auto">
             {getDayTasks(date).map((task) => {
               const category = getTaskCategory(task.categoryId);
+              const status = getTaskStatus(task);
               return (
                 <div
                   key={task.id}
-                  className="mb-2 rounded-lg p-2 shadow-sm text-sm"
+                  className={`mb-2 rounded-lg p-2 shadow-sm text-sm
+                    ${status === 'overdue' ? 'border-error border-2' : ''}
+                    ${status === 'upcoming' ? 'border-warning border-2' : ''}
+                  `}
                   style={{
                     backgroundColor: category ? `${category.color}20` : 'hsl(var(--p) / 0.1)',
                     borderLeft: category ? `3px solid ${category.color}` : '3px solid hsl(var(--p))'
                   }}
                 >
-                  <h4 className="font-medium truncate">{task.title}</h4>
+                  <h4 className="font-medium truncate flex items-center gap-1">
+                    {task.title}
+                    {task.reminder && <span className="text-warning text-[10px]">⏰</span>}
+                  </h4>
                   <p className="text-xs text-base-content/70">
                     {format(parseISO(task.dueDate), 'HH:mm')}
                   </p>

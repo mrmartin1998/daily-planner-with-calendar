@@ -1,5 +1,5 @@
 'use client';
-import { format, isSameDay, parseISO, isValid } from 'date-fns';
+import { format, isSameDay, parseISO, isValid, isPast, addMinutes, isWithinInterval } from 'date-fns';
 import { useTaskContext } from '@/context/TaskContext';
 
 export default function DailyView({ selectedDate, tasks }) {
@@ -27,6 +27,24 @@ export default function DailyView({ selectedDate, tasks }) {
       console.error('Error parsing task time:', error);
       return null;
     }
+  };
+
+  const getTaskStatus = (task) => {
+    const now = new Date();
+    const dueDate = parseISO(task.dueDate);
+    
+    if (isPast(dueDate)) {
+      return 'overdue';
+    }
+
+    if (task.reminder) {
+      const reminderTime = addMinutes(dueDate, -parseInt(task.reminder));
+      if (isWithinInterval(now, { start: reminderTime, end: dueDate })) {
+        return 'upcoming';
+      }
+    }
+
+    return 'normal';
   };
 
   return (
@@ -63,7 +81,10 @@ export default function DailyView({ selectedDate, tasks }) {
               return (
                 <div
                   key={`${task.id}-${hour}`}
-                  className="absolute inset-x-0 mx-1 rounded-lg p-2 shadow-md z-10"
+                  className={`absolute inset-x-0 mx-1 rounded-lg p-2 shadow-md z-10
+                    ${getTaskStatus(task) === 'overdue' ? 'border-error border-2' : ''}
+                    ${getTaskStatus(task) === 'upcoming' ? 'border-warning border-2' : ''}
+                  `}
                   style={{ 
                     backgroundColor: category ? `${category.color}20` : 'hsl(var(--p) / 0.1)',
                     borderLeft: category ? `3px solid ${category.color}` : '3px solid hsl(var(--p))',
@@ -71,7 +92,12 @@ export default function DailyView({ selectedDate, tasks }) {
                     top: '2px'
                   }}
                 >
-                  <h4 className="font-medium text-sm truncate">{task.title}</h4>
+                  <h4 className="font-medium text-sm truncate">
+                    {task.title}
+                    {task.reminder && (
+                      <span className="badge badge-warning badge-xs ml-1">⏰</span>
+                    )}
+                  </h4>
                   <p className="text-xs text-base-content/70">
                     {format(taskTime, 'HH:mm')}
                   </p>
