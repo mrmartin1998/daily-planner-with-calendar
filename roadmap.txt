@@ -27,8 +27,8 @@ Daily Planner with Calendar View - Learning Roadmap
       - Task categorization ✓
    
    b. Calendar Implementation
-      - Daily view ⏳
-      - Weekly view ⏳
+      - Daily view ✓
+      - Weekly view ✓
       - Monthly view ⏳
       - Navigation between views ⏳
    
