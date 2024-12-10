@@ -47,13 +47,13 @@ export default function TaskForm({ onSubmit, initialData = null }) {
   const handleSubmit = (e) => {
     e.preventDefault();
     
-    const dateString = formData.dueTime 
-      ? `${formData.dueDate}T${formData.dueTime}:00.000Z`
-      : `${formData.dueDate}T00:00:00.000Z`;
-
+    // Create date string in local timezone
+    const dateTimeString = `${formData.dueDate}T${formData.dueTime}`;
+    const localDate = new Date(dateTimeString);
+    
     onSubmit({
       ...formData,
-      dueDate: dateString
+      dueDate: localDate.toISOString()  // Store as ISO string
     });
   };
 
