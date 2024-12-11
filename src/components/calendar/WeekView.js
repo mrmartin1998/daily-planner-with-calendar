@@ -60,7 +60,11 @@ export default function WeekView({ selectedDate, tasks, onTaskClick }) {
       detail: initialData 
     });
     window.dispatchEvent(event);
-    document.getElementById('calendar-task-modal').showModal();
+
+    const modal = document.getElementById('calendar-task-modal');
+    if (modal) {
+      modal.showModal();
+    }
   };
 
   return (

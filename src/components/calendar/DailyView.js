@@ -80,7 +80,10 @@ export default function DailyView({ selectedDate, tasks, onTaskClick }) {
     window.dispatchEvent(event);
     
     // Open the task modal
-    document.getElementById('calendar-task-modal').showModal();
+    const modal = document.getElementById('calendar-task-modal');
+    if (modal) {
+      modal.showModal();
+    }
   };
 
   return (

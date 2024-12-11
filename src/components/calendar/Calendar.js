@@ -80,8 +80,11 @@ export default function Calendar() {
 
   const handleTaskClick = (e, task) => {
     e.stopPropagation(); // Prevent triggering the time slot click
-    setSelectedTask(task);
-    document.getElementById('task-details-modal').showModal();
+    const modal = document.getElementById('task-details-modal');
+    if (modal) {
+      setSelectedTask(task);
+      modal.showModal();
+    }
   };
 
   const handleEditTask = (task) => {
