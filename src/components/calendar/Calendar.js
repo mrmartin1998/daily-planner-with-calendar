@@ -18,7 +18,7 @@ import TaskForm from '../tasks/TaskForm';
 import TaskDetailsModal from '../tasks/TaskDetailsModal';
 
 export default function Calendar() {
-  const { tasks, createTask, deleteTask } = useTaskContext();
+  const { tasks, createTask, deleteTask, updateTask } = useTaskContext();
   const [selectedDate, setSelectedDate] = useState(startOfToday());
   const [view, setView] = useState('daily');
   const [slotInitialData, setSlotInitialData] = useState(null);
@@ -112,7 +112,7 @@ export default function Calendar() {
   };
 
   const handleTaskClick = (e, task) => {
-    e.stopPropagation(); // Prevent triggering the time slot click
+    e.stopPropagation();
     setSelectedTask(task);
     const modal = document.getElementById('task-details-modal');
     if (modal) {
@@ -120,9 +120,21 @@ export default function Calendar() {
     }
   };
 
-  const handleEditTask = (task) => {
-    setSlotInitialData(task);
-    document.getElementById('calendar-task-modal').showModal();
+  const handleEditTask = (taskData) => {
+    try {
+      const updatedTask = {
+        ...taskData,
+        id: selectedTask.id
+      };
+      updateTask(updatedTask);
+      const modal = document.getElementById('task-details-modal');
+      if (modal) {
+        modal.close();
+      }
+      setSelectedTask(null);
+    } catch (error) {
+      console.error('Error updating task:', error);
+    }
   };
 
   const handleViewChange = (newView) => {
@@ -235,16 +247,23 @@ export default function Calendar() {
             onSubmit={handleCreateTask}
             initialData={slotInitialData}
             modalId="calendar-task-modal"
+            mode="create"
           />
         </div>
       </dialog>
 
       {/* Task Details Modal */}
-      <TaskDetailsModal 
-        task={selectedTask}
-        onEdit={handleEditTask}
-        onDelete={deleteTask}
-      />
+      <dialog id="task-details-modal" className="modal">
+        <div className="modal-box">
+          <h3 className="font-bold text-lg mb-4">Edit Task</h3>
+          <TaskForm 
+            onSubmit={handleEditTask}
+            initialData={selectedTask}
+            modalId="task-details-modal"
+            mode="edit"
+          />
+        </div>
+      </dialog>
     </div>
   );
 } 

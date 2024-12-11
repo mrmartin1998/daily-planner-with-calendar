@@ -83,7 +83,6 @@ export default function DailyView({ selectedDate, tasks, onTaskClick }) {
     const formattedTime = `${hour.toString().padStart(2, '0')}:00`;
     
     const initialData = {
-      title: `${hour}:00 - ${(hour + 1)}:00`,
       dueDate: formattedDate,
       dueTime: formattedTime,
       _timestamp: Date.now()

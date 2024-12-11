@@ -15,7 +15,7 @@ const defaultFormData = {
   reminder: '',
 };
 
-export default function TaskForm({ onSubmit, initialData = null, modalId = 'task-modal' }) {
+export default function TaskForm({ onSubmit, initialData = null, modalId = 'task-modal', mode = 'create' }) {
   const { categories } = useTaskContext();
   const [formData, setFormData] = useState(defaultFormData);
 
@@ -23,28 +23,15 @@ export default function TaskForm({ onSubmit, initialData = null, modalId = 'task
     console.log('TaskForm - Received initialData:', initialData);
     
     if (initialData) {
-      // Handle calendar slot data
-      if (initialData.dueDate && initialData.dueTime) {
-        console.log('TaskForm - Setting calendar slot data');
-        setFormData(prev => ({
-          ...defaultFormData,
-          dueDate: initialData.dueDate,
-          dueTime: initialData.dueTime
-        }));
-      } else {
-        // Handle existing task data
+      if (mode === 'edit' && initialData.id) {
+        // Handle editing existing task
         console.log('TaskForm - Setting existing task data');
-        let date;
-        try {
-          date = initialData.dueDate ? parseISO(initialData.dueDate) : new Date();
-          if (!isValid(date)) date = new Date();
-        } catch (error) {
-          date = new Date();
-        }
+        let date = parseISO(initialData.dueDate);
+        if (!isValid(date)) date = new Date();
 
         setFormData({
-          id: initialData.id || '',
-          title: initialData.title || '',
+          id: initialData.id,
+          title: initialData.title,
           description: initialData.description || '',
           dueDate: format(date, 'yyyy-MM-dd'),
           dueTime: format(date, 'HH:mm'),
@@ -52,12 +39,21 @@ export default function TaskForm({ onSubmit, initialData = null, modalId = 'task
           categoryId: initialData.categoryId || '',
           reminder: initialData.reminder || '',
         });
+      } else {
+        // Handle new task from calendar slot
+        console.log('TaskForm - Setting calendar slot data');
+        setFormData(prev => ({
+          ...defaultFormData,
+          dueDate: initialData.dueDate,
+          dueTime: initialData.dueTime,
+          title: initialData.title || ''
+        }));
       }
     } else {
       console.log('TaskForm - Resetting to default form data');
       setFormData(defaultFormData);
     }
-  }, [initialData]);
+  }, [initialData, mode]);
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -173,7 +169,7 @@ export default function TaskForm({ onSubmit, initialData = null, modalId = 'task
         </select>
       </div>
 
-      <div className="flex justify-end gap-2 mt-6">
+      <div className="modal-action">
         <button 
           type="button" 
           className="btn" 
@@ -185,7 +181,7 @@ export default function TaskForm({ onSubmit, initialData = null, modalId = 'task
           type="submit" 
           className="btn btn-primary"
         >
-          {initialData ? 'Update Task' : 'Create Task'}
+          {mode === 'edit' ? 'Update Task' : 'Create Task'}
         </button>
       </div>
     </form>
