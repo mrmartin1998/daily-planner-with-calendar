@@ -117,7 +117,12 @@ export default function Calendar() {
     e.stopPropagation();
     setSelectedTask(task);
     setSlotInitialData(null);
-    document.getElementById('task-details-modal').showModal();
+    setTimeout(() => {
+      const modal = document.getElementById('task-details-modal');
+      if (modal) {
+        modal.showModal();
+      }
+    }, 0);
   };
 
   const handleEditClick = (task) => {
