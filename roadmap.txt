@@ -107,3 +107,8 @@ Project Timeline:
 5. Styling and polish (2-3 days) ⏳
 
 Total estimated time: 2-3 weeks
+
+
+--------------------------------
+- Drag-and-drop task rescheduling ⏳
+- View transitions and animations ⏳

@@ -23,6 +23,7 @@ export default function Calendar() {
   const [view, setView] = useState('daily');
   const [slotInitialData, setSlotInitialData] = useState(null);
   const [selectedTask, setSelectedTask] = useState(null);
+  const [viewTransitioning, setViewTransitioning] = useState(false);
 
   useEffect(() => {
     const handleSlotClick = (event) => {
@@ -80,9 +81,9 @@ export default function Calendar() {
 
   const handleTaskClick = (e, task) => {
     e.stopPropagation(); // Prevent triggering the time slot click
+    setSelectedTask(task);
     const modal = document.getElementById('task-details-modal');
     if (modal) {
-      setSelectedTask(task);
       modal.showModal();
     }
   };
@@ -92,6 +93,20 @@ export default function Calendar() {
     document.getElementById('calendar-task-modal').showModal();
   };
 
+  const handleViewChange = (newView) => {
+    setViewTransitioning(true);
+    setTimeout(() => {
+      setView(newView);
+      setViewTransitioning(false);
+    }, 150);
+  };
+
+  const handleNavigate = (direction) => {
+    setViewTransitioning(true);
+    navigateDate(direction);
+    setTimeout(() => setViewTransitioning(false), 150);
+  };
+
   return (
     <div className="flex flex-col h-full">
       {/* Calendar Header */}
@@ -99,7 +114,7 @@ export default function Calendar() {
         <div className="flex items-center gap-2">
           <button 
             className="btn btn-square btn-sm"
-            onClick={() => navigateDate('prev')}
+            onClick={() => handleNavigate('prev')}
           >
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4">
               <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
@@ -107,7 +122,7 @@ export default function Calendar() {
           </button>
           <button 
             className="btn btn-square btn-sm"
-            onClick={() => navigateDate('next')}
+            onClick={() => handleNavigate('next')}
           >
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4">
               <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
@@ -115,7 +130,7 @@ export default function Calendar() {
           </button>
           <button 
             className="btn btn-sm"
-            onClick={() => navigateDate('today')}
+            onClick={() => handleNavigate('today')}
           >
             Today
           </button>
@@ -128,19 +143,19 @@ export default function Calendar() {
         <div className="join">
           <button 
             className={`join-item btn btn-sm ${view === 'daily' ? 'btn-active' : ''}`}
-            onClick={() => setView('daily')}
+            onClick={() => handleViewChange('daily')}
           >
             Day
           </button>
           <button 
             className={`join-item btn btn-sm ${view === 'weekly' ? 'btn-active' : ''}`}
-            onClick={() => setView('weekly')}
+            onClick={() => handleViewChange('weekly')}
           >
             Week
           </button>
           <button 
             className={`join-item btn btn-sm ${view === 'monthly' ? 'btn-active' : ''}`}
-            onClick={() => setView('monthly')}
+            onClick={() => handleViewChange('monthly')}
           >
             Month
           </button>
@@ -149,7 +164,13 @@ export default function Calendar() {
 
       {/* Calendar Content */}
       <div className="flex-1 bg-base-200 rounded-lg p-4 overflow-hidden">
-        <div className="transition-all duration-300 ease-in-out">
+        <div 
+          className="h-full transition-all duration-300 ease-in-out transform"
+          style={{
+            opacity: viewTransitioning ? '0' : '1',
+            transform: viewTransitioning ? 'scale(0.98)' : 'scale(1)'
+          }}
+        >
           {view === 'daily' && (
             <DailyView 
               selectedDate={selectedDate} 
