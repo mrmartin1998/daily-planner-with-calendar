@@ -161,7 +161,13 @@ export default function Calendar() {
               onTaskClick={handleTaskClick}
             />
           )}
-          {view === 'monthly' && <MonthView selectedDate={selectedDate} tasks={tasks} />}
+          {view === 'monthly' && (
+            <MonthView 
+              selectedDate={selectedDate} 
+              tasks={tasks} 
+              onTaskClick={handleTaskClick}
+            />
+          )}
         </div>
       </div>
 

@@ -16,7 +16,7 @@ import {
 } from 'date-fns';
 import { useTaskContext } from '@/context/TaskContext';
 
-export default function MonthView({ selectedDate, tasks }) {
+export default function MonthView({ selectedDate, tasks, onTaskClick }) {
   const { categories } = useTaskContext();
 
   // Get all days in the month grid (including days from prev/next months)
@@ -53,6 +53,22 @@ export default function MonthView({ selectedDate, tasks }) {
     return 'normal';
   };
 
+  const handleDayClick = (date) => {
+    const formattedDate = format(date, 'yyyy-MM-dd');
+    const formattedTime = format(new Date(), 'HH:mm');
+
+    const initialData = {
+      dueDate: formattedDate,
+      dueTime: formattedTime
+    };
+
+    const event = new CustomEvent('calendar:slot-click', { 
+      detail: initialData 
+    });
+    window.dispatchEvent(event);
+    document.getElementById('calendar-task-modal').showModal();
+  };
+
   return (
     <div className="grid grid-cols-7 gap-2">
       {/* Weekday headers */}
@@ -70,9 +86,10 @@ export default function MonthView({ selectedDate, tasks }) {
         return (
           <div
             key={date.toString()}
-            className={`min-h-[100px] p-1 border rounded-lg ${
+            className={`min-h-[100px] p-1 border rounded-lg cursor-pointer hover:bg-base-200 transition-colors ${
               isCurrentMonth ? 'bg-base-100' : 'bg-base-200 opacity-50'
             }`}
+            onClick={() => handleDayClick(date)}
           >
             <div className="text-sm font-medium mb-1">
               {format(date, 'd')}
@@ -85,13 +102,17 @@ export default function MonthView({ selectedDate, tasks }) {
                 return (
                   <div
                     key={task.id}
-                    className={`text-xs truncate rounded px-1 py-0.5 flex items-center gap-1
+                    className={`text-xs truncate rounded px-1 py-0.5 flex items-center gap-1 hover:ring-2 hover:ring-primary/50 cursor-pointer
                       ${status === 'overdue' ? 'border-error border' : ''}
                       ${status === 'upcoming' ? 'border-warning border' : ''}
                     `}
                     style={{
                       backgroundColor: category ? `${category.color}20` : 'hsl(var(--p) / 0.1)',
                       borderLeft: category ? `2px solid ${category.color}` : '2px solid hsl(var(--p))'
+                    }}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onTaskClick(e, task);
                     }}
                   >
                     <span>{task.title}</span>
