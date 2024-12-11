@@ -39,11 +39,43 @@ export default function Calendar() {
   }, []);
 
   const handleCreateTask = (formData) => {
-    console.log('Calendar - Creating task with data:', formData);
-    createTask(formData);
-    document.getElementById('calendar-task-modal').close();
-    setSlotInitialData(null); // Reset the initial data
-    console.log('Calendar - Reset slotInitialData to null');
+    try {
+      const { dueDate, dueTime } = formData;
+      
+      // Validate date format
+      if (!dueDate || !dueTime) {
+        throw new Error('Date and time are required');
+      }
+      
+      // Parse the date and time
+      let dateTime;
+      
+      if (dueDate.includes('T')) {
+        // If it's already an ISO string, parse it directly
+        dateTime = new Date(dueDate);
+      } else {
+        // Otherwise parse as separate date and time
+        const [year, month, day] = dueDate.split('-').map(Number);
+        const [hours, minutes] = dueTime.split(':').map(Number);
+        dateTime = new Date(year, month - 1, day, hours, minutes);
+      }
+      
+      // Validate the resulting date
+      if (isNaN(dateTime.getTime())) {
+        throw new Error('Invalid date/time combination');
+      }
+      
+      const taskData = {
+        ...formData,
+        dueDate: dateTime.toISOString()
+      };
+      
+      createTask(taskData);
+      document.getElementById('calendar-task-modal').close();
+      setSlotInitialData(null);
+    } catch (error) {
+      console.error('Error creating task:', error);
+    }
   };
 
   const navigateDate = (direction) => {

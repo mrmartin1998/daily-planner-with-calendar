@@ -35,11 +35,21 @@ export default function DailyView({ selectedDate, tasks, onTaskClick }) {
 
   const getTaskTime = (task) => {
     try {
-      const date = parseISO(task.dueDate);
+      if (!task.dueDate) return null;
+      
+      // Parse the ISO string
+      const date = new Date(task.dueDate);
       if (!isValid(date)) return null;
       
-      // Convert to local time
-      const localDate = new Date(date.getTime() - (date.getTimezoneOffset() * 60000));
+      // Create a new date with local timezone
+      const localDate = new Date(
+        date.getFullYear(),
+        date.getMonth(),
+        date.getDate(),
+        date.getHours(),
+        date.getMinutes()
+      );
+      
       return localDate;
     } catch (error) {
       console.error('Error parsing task time:', error);
@@ -66,38 +76,24 @@ export default function DailyView({ selectedDate, tasks, onTaskClick }) {
   };
 
   const handleTimeSlotClick = (hour) => {
-    console.log('DailyView - Clicked hour:', hour);
-    console.log('DailyView - Selected date:', selectedDate);
-
-    // Create a new date object for the selected date and hour
     const selectedDateTime = new Date(selectedDate);
     selectedDateTime.setHours(hour, 0, 0, 0);
     
-    console.log('DailyView - Selected DateTime:', selectedDateTime);
-    console.log('DailyView - Selected DateTime Hour:', selectedDateTime.getHours());
-
-    // Format the date and time for the form
     const formattedDate = format(selectedDateTime, 'yyyy-MM-dd');
-    const formattedTime = format(selectedDateTime, 'HH:mm');
+    const formattedTime = `${hour.toString().padStart(2, '0')}:00`;
     
-    console.log('DailyView - Formatted date:', formattedDate);
-    console.log('DailyView - Formatted time:', formattedTime);
-
-    // Create initial data object
     const initialData = {
+      title: `${hour}:00 - ${(hour + 1)}:00`,
       dueDate: formattedDate,
-      dueTime: formattedTime
+      dueTime: formattedTime,
+      _timestamp: Date.now()
     };
 
-    console.log('DailyView - Dispatching event with data:', initialData);
-
-    // Pass the initialData through a custom event
     const event = new CustomEvent('calendar:slot-click', { 
       detail: initialData 
     });
     window.dispatchEvent(event);
     
-    // Open the task modal
     document.getElementById('calendar-task-modal').showModal();
   };
 
@@ -112,19 +108,31 @@ export default function DailyView({ selectedDate, tasks, onTaskClick }) {
     if (!tasks.length) return [];
     
     // Sort tasks by start time and then by title
-    const sortedTasks = [...tasks].slice(0, MAX_VISIBLE_TASKS).sort((a, b) => {
+    const sortedTasks = [...tasks].sort((a, b) => {
       const timeA = getTaskTime(a);
       const timeB = getTaskTime(b);
-      const timeDiff = timeA.getTime() - timeB.getTime();
-      return timeDiff === 0 ? a.title.localeCompare(b.title) : timeDiff;
+      if (!timeA || !timeB) return 0;
+      return timeA.getTime() - timeB.getTime() || a.title.localeCompare(b.title);
     });
 
-    // For simplicity, just assign positions sequentially
-    return sortedTasks.map((task, index) => ({
-      task,
-      position: index,
-      total: sortedTasks.length
-    }));
+    // Calculate positions
+    const positions = [];
+    const occupied = new Set();
+
+    for (const task of sortedTasks) {
+      let position = 0;
+      while (occupied.has(position)) {
+        position++;
+      }
+      occupied.add(position);
+      positions.push({
+        task,
+        position,
+        total: Math.max(occupied.size, positions.length)
+      });
+    }
+
+    return positions;
   };
 
   const isOverlapping = (task1, task2) => {
@@ -182,7 +190,10 @@ export default function DailyView({ selectedDate, tasks, onTaskClick }) {
         {Array.from({ length: 24 }, (_, hour) => {
           const hourTasks = dailyTasks.filter(task => {
             const taskTime = getTaskTime(task);
-            return taskTime && taskTime.getHours() === hour;
+            if (!taskTime) return false;
+            // Check if the task falls within this hour's slot
+            const taskHour = taskTime.getHours();
+            return taskHour === hour;
           });
 
           const taskPositions = calculateTaskPositions(hourTasks);
@@ -196,6 +207,7 @@ export default function DailyView({ selectedDate, tasks, onTaskClick }) {
                 ${isSameHour(currentTime, new Date(selectedDate.getTime())) && hour === currentTime.getHours() ? 'bg-primary/5' : ''}
               `}
               onClick={() => handleTimeSlotClick(hour)}
+              data-hour={hour} // Add data attribute for debugging
             >
               {taskPositions.map(({ task, position, total }) => {
                 const category = getTaskCategory(task.categoryId);
