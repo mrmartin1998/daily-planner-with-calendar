@@ -77,9 +77,9 @@ Learning Objectives:
       - View transitions and animations ✓
    
    b. Daily View Enhancements
-      - Time slot hover effects ⏳
+      - Time slot hover effects ✓
       - Task overlap handling ⏳
-      - Time indicators (current time line) ⏳
+      - Time indicators (current time line) ✓
       - Quick task preview tooltips ⏳
    
    c. Weekly/Monthly Features
