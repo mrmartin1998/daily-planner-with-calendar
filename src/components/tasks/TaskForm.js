@@ -15,33 +15,46 @@ const defaultFormData = {
   reminder: '',
 };
 
-export default function TaskForm({ onSubmit, initialData = null }) {
+export default function TaskForm({ onSubmit, initialData = null, modalId = 'task-modal' }) {
   const { categories } = useTaskContext();
   const [formData, setFormData] = useState(defaultFormData);
 
   useEffect(() => {
+    console.log('TaskForm - Received initialData:', initialData);
+    
     if (initialData) {
-      let date;
-      try {
-        date = initialData.dueDate ? new Date(initialData.dueDate) : new Date();
-        if (isNaN(date.getTime())) {
+      // Handle calendar slot data
+      if (initialData.dueDate && initialData.dueTime) {
+        console.log('TaskForm - Setting calendar slot data');
+        setFormData(prev => ({
+          ...defaultFormData,
+          dueDate: initialData.dueDate,
+          dueTime: initialData.dueTime
+        }));
+      } else {
+        // Handle existing task data
+        console.log('TaskForm - Setting existing task data');
+        let date;
+        try {
+          date = initialData.dueDate ? parseISO(initialData.dueDate) : new Date();
+          if (!isValid(date)) date = new Date();
+        } catch (error) {
           date = new Date();
         }
-      } catch (error) {
-        date = new Date();
-      }
 
-      setFormData({
-        id: initialData.id || '',
-        title: initialData.title || '',
-        description: initialData.description || '',
-        dueDate: format(date, 'yyyy-MM-dd'),
-        dueTime: format(date, 'HH:mm'),
-        priority: initialData.priority || 'low',
-        categoryId: initialData.categoryId || '',
-        reminder: initialData.reminder || '',
-      });
+        setFormData({
+          id: initialData.id || '',
+          title: initialData.title || '',
+          description: initialData.description || '',
+          dueDate: format(date, 'yyyy-MM-dd'),
+          dueTime: format(date, 'HH:mm'),
+          priority: initialData.priority || 'low',
+          categoryId: initialData.categoryId || '',
+          reminder: initialData.reminder || '',
+        });
+      }
     } else {
+      console.log('TaskForm - Resetting to default form data');
       setFormData(defaultFormData);
     }
   }, [initialData]);
@@ -57,6 +70,10 @@ export default function TaskForm({ onSubmit, initialData = null }) {
       ...formData,
       dueDate: localDate.toISOString()  // Store as ISO string
     });
+  };
+
+  const handleCancel = () => {
+    document.getElementById(modalId).close();
   };
 
   return (
@@ -160,7 +177,7 @@ export default function TaskForm({ onSubmit, initialData = null }) {
         <button 
           type="button" 
           className="btn" 
-          onClick={() => document.getElementById('task-modal').close()}
+          onClick={handleCancel}
         >
           Cancel
         </button>

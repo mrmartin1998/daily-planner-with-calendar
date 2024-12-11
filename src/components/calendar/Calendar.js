@@ -1,5 +1,5 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { 
   format, 
   addDays, 
@@ -14,11 +14,34 @@ import { useTaskContext } from '@/context/TaskContext';
 import DailyView from './DailyView';
 import WeekView from './WeekView';
 import MonthView from './MonthView';
+import TaskForm from '../tasks/TaskForm';
 
 export default function Calendar() {
+  const { tasks, createTask } = useTaskContext();
   const [selectedDate, setSelectedDate] = useState(startOfToday());
   const [view, setView] = useState('daily');
-  const { tasks } = useTaskContext();
+  const [slotInitialData, setSlotInitialData] = useState(null);
+
+  useEffect(() => {
+    const handleSlotClick = (event) => {
+      console.log('Calendar - Received slot click event with data:', event.detail);
+      setSlotInitialData({
+        ...event.detail,
+        _timestamp: Date.now()
+      });
+    };
+
+    window.addEventListener('calendar:slot-click', handleSlotClick);
+    return () => window.removeEventListener('calendar:slot-click', handleSlotClick);
+  }, []);
+
+  const handleCreateTask = (formData) => {
+    console.log('Calendar - Creating task with data:', formData);
+    createTask(formData);
+    document.getElementById('calendar-task-modal').close();
+    setSlotInitialData(null); // Reset the initial data
+    console.log('Calendar - Reset slotInitialData to null');
+  };
 
   const navigateDate = (direction) => {
     if (direction === 'today') {
@@ -116,6 +139,18 @@ export default function Calendar() {
           {view === 'monthly' && <MonthView selectedDate={selectedDate} tasks={tasks} />}
         </div>
       </div>
+
+      {/* Task Creation Modal */}
+      <dialog id="calendar-task-modal" className="modal">
+        <div className="modal-box">
+          <h3 className="font-bold text-lg mb-4">Create New Task</h3>
+          <TaskForm 
+            onSubmit={handleCreateTask}
+            initialData={slotInitialData}
+            modalId="calendar-task-modal"
+          />
+        </div>
+      </dialog>
     </div>
   );
 } 

@@ -70,9 +70,29 @@ Learning Objectives:
    - Accessibility ⏳
 
 4. Calendar Implementation
-   - Date manipulation ✓
-   - Calendar logic ⏳
-   - View transitions ⏳
+   a. Core Calendar Features
+      - Click-to-add task functionality ⏳
+      - Task details popup on click ⏳
+      - Drag-and-drop task rescheduling ⏳
+      - View transitions and animations ⏳
+   
+   b. Daily View Enhancements
+      - Time slot hover effects ⏳
+      - Task overlap handling ⏳
+      - Time indicators (current time line) ⏳
+      - Quick task preview tooltips ⏳
+   
+   c. Weekly/Monthly Features
+      - Week number indicators ⏳
+      - Task count badges for busy days ⏳
+      - Mini task previews ⏳
+      - Month quick-jump selector ⏳
+   
+   d. Calendar Navigation
+      - Keyboard shortcuts ⏳
+      - Date picker for quick navigation ⏳
+      - Today indicator highlighting ⏳
+      - View persistence between sessions ⏳
 
 5. Browser APIs
    - Notifications ✓
