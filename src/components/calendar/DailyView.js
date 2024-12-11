@@ -1,11 +1,29 @@
 'use client';
 import { format, isSameDay, parseISO, isValid, isPast, addMinutes, isWithinInterval } from 'date-fns';
 import { useTaskContext } from '@/context/TaskContext';
+import { useState, useEffect } from 'react';
 
 export default function DailyView({ selectedDate, tasks, onTaskClick }) {
   const { categories, createTask } = useTaskContext();
   const hours = Array.from({ length: 24 }, (_, i) => i);
+  const [currentTime, setCurrentTime] = useState(new Date());
   
+  // Update current time every minute
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentTime(new Date());
+    }, 60000); // Update every minute
+    
+    return () => clearInterval(timer);
+  }, []);
+
+  // Calculate current time indicator position
+  const getCurrentTimePosition = () => {
+    const now = currentTime;
+    const minutes = now.getHours() * 60 + now.getMinutes();
+    return (minutes / 1440) * 100; // Convert to percentage of day
+  };
+
   const dailyTasks = tasks.filter(task => {
     const taskDate = parseISO(task.dueDate);
     return isSameDay(taskDate, selectedDate);
@@ -80,10 +98,14 @@ export default function DailyView({ selectedDate, tasks, onTaskClick }) {
     window.dispatchEvent(event);
     
     // Open the task modal
-    const modal = document.getElementById('calendar-task-modal');
-    if (modal) {
-      modal.showModal();
-    }
+    document.getElementById('calendar-task-modal').showModal();
+  };
+
+  const isSameHour = (date1, date2) => {
+    // Ensure both are Date objects
+    const d1 = new Date(date1);
+    const d2 = new Date(date2);
+    return d1.getHours() === d2.getHours();
   };
 
   return (
@@ -118,6 +140,17 @@ export default function DailyView({ selectedDate, tasks, onTaskClick }) {
 
       {/* Time slots column */}
       <div className="relative border-l border-base-content/10">
+        {/* Current time indicator */}
+        {isSameDay(currentTime, selectedDate) && (
+          <div 
+            className="absolute w-full z-10 flex items-center pointer-events-none"
+            style={{ top: `${getCurrentTimePosition()}%` }}
+          >
+            <div className="w-2 h-2 rounded-full bg-primary -ml-1"></div>
+            <div className="flex-1 border-t border-primary"></div>
+          </div>
+        )}
+
         {Array.from({ length: 24 }, (_, hour) => {
           const hourTasks = dailyTasks.filter(task => {
             const taskTime = getTaskTime(task);
@@ -127,7 +160,11 @@ export default function DailyView({ selectedDate, tasks, onTaskClick }) {
           return (
             <div 
               key={`slot-${hour}`}
-              className="h-20 border-t border-base-content/10 relative hover:bg-base-200 cursor-pointer transition-colors"
+              className={`
+                h-20 border-t border-base-content/10 relative 
+                hover:bg-base-200 cursor-pointer transition-colors
+                ${isSameHour(currentTime, new Date(selectedDate.getTime())) && hour === currentTime.getHours() ? 'bg-primary/5' : ''}
+              `}
               onClick={() => handleTimeSlotClick(hour)}
             >
               {hourTasks.map((task) => {
