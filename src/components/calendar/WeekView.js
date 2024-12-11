@@ -12,7 +12,7 @@ import {
 } from 'date-fns';
 import { useTaskContext } from '@/context/TaskContext';
 
-export default function WeekView({ selectedDate, tasks }) {
+export default function WeekView({ selectedDate, tasks, onTaskClick }) {
   const { categories } = useTaskContext();
   
   const weekStart = startOfWeek(selectedDate, { weekStartsOn: 1 });
@@ -47,6 +47,22 @@ export default function WeekView({ selectedDate, tasks }) {
     return 'normal';
   };
 
+  const handleTimeSlotClick = (date) => {
+    const formattedDate = format(date, 'yyyy-MM-dd');
+    const formattedTime = format(new Date(), 'HH:mm');
+
+    const initialData = {
+      dueDate: formattedDate,
+      dueTime: formattedTime
+    };
+
+    const event = new CustomEvent('calendar:slot-click', { 
+      detail: initialData 
+    });
+    window.dispatchEvent(event);
+    document.getElementById('calendar-task-modal').showModal();
+  };
+
   return (
     <div className="grid grid-cols-7 h-full gap-2">
       {/* Day headers */}
@@ -57,21 +73,27 @@ export default function WeekView({ selectedDate, tasks }) {
             <div className="font-semibold">{format(date, 'd')}</div>
           </div>
           
-          {/* Day column */}
-          <div className="flex-1 bg-base-100 rounded-lg p-2 overflow-y-auto">
+          <div 
+            className="flex-1 bg-base-100 rounded-lg p-2 overflow-y-auto hover:bg-base-200 cursor-pointer transition-colors"
+            onClick={() => handleTimeSlotClick(date)}
+          >
             {getDayTasks(date).map((task) => {
               const category = getTaskCategory(task.categoryId);
               const status = getTaskStatus(task);
               return (
                 <div
                   key={task.id}
-                  className={`mb-2 rounded-lg p-2 shadow-sm text-sm
+                  className={`mb-2 rounded-lg p-2 shadow-sm text-sm hover:ring-2 hover:ring-primary/50 cursor-pointer
                     ${status === 'overdue' ? 'border-error border-2' : ''}
                     ${status === 'upcoming' ? 'border-warning border-2' : ''}
                   `}
                   style={{
                     backgroundColor: category ? `${category.color}20` : 'hsl(var(--p) / 0.1)',
                     borderLeft: category ? `3px solid ${category.color}` : '3px solid hsl(var(--p))'
+                  }}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onTaskClick(e, task);
                   }}
                 >
                   <h4 className="font-medium truncate flex items-center gap-1">

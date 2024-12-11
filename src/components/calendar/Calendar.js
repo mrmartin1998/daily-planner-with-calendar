@@ -154,7 +154,13 @@ export default function Calendar() {
               onTaskClick={handleTaskClick}
             />
           )}
-          {view === 'weekly' && <WeekView selectedDate={selectedDate} tasks={tasks} />}
+          {view === 'weekly' && (
+            <WeekView 
+              selectedDate={selectedDate} 
+              tasks={tasks} 
+              onTaskClick={handleTaskClick}
+            />
+          )}
           {view === 'monthly' && <MonthView selectedDate={selectedDate} tasks={tasks} />}
         </div>
       </div>
