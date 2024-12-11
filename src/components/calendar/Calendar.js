@@ -27,11 +27,12 @@ export default function Calendar() {
 
   useEffect(() => {
     const handleSlotClick = (event) => {
-      console.log('Calendar - Received slot click event with data:', event.detail);
+      setSelectedTask(null);
       setSlotInitialData({
         ...event.detail,
         _timestamp: Date.now()
       });
+      document.getElementById('calendar-task-modal').showModal();
     };
 
     window.addEventListener('calendar:slot-click', handleSlotClick);
@@ -73,6 +74,7 @@ export default function Calendar() {
       createTask(taskData);
       document.getElementById('calendar-task-modal').close();
       setSlotInitialData(null);
+      setSelectedTask(null);
     } catch (error) {
       console.error('Error creating task:', error);
     }
@@ -114,24 +116,26 @@ export default function Calendar() {
   const handleTaskClick = (e, task) => {
     e.stopPropagation();
     setSelectedTask(task);
-    const modal = document.getElementById('task-details-modal');
-    if (modal) {
-      modal.showModal();
-    }
+    setSlotInitialData(null);
+    document.getElementById('task-details-modal').showModal();
   };
 
-  const handleEditTask = (taskData) => {
+  const handleEditClick = (task) => {
+    setSelectedTask(task);
+    setSlotInitialData(null);
+    document.getElementById('calendar-task-modal').showModal();
+  };
+
+  const handleEditTask = (formData) => {
     try {
       const updatedTask = {
-        ...taskData,
+        ...formData,
         id: selectedTask.id
       };
       updateTask(updatedTask);
-      const modal = document.getElementById('task-details-modal');
-      if (modal) {
-        modal.close();
-      }
+      document.getElementById('calendar-task-modal').close();
       setSelectedTask(null);
+      setSlotInitialData(null);
     } catch (error) {
       console.error('Error updating task:', error);
     }
@@ -239,31 +243,25 @@ export default function Calendar() {
         </div>
       </div>
 
-      {/* Task Creation Modal */}
+      {/* Task Creation/Edit Modal */}
       <dialog id="calendar-task-modal" className="modal">
         <div className="modal-box">
-          <h3 className="font-bold text-lg mb-4">Create New Task</h3>
+          <h3 className="font-bold text-lg mb-4">{selectedTask ? 'Edit Task' : 'Create New Task'}</h3>
           <TaskForm 
-            onSubmit={handleCreateTask}
-            initialData={slotInitialData}
+            onSubmit={selectedTask ? handleEditTask : handleCreateTask}
+            initialData={selectedTask || slotInitialData}
             modalId="calendar-task-modal"
-            mode="create"
+            mode={selectedTask ? 'edit' : 'create'}
           />
         </div>
       </dialog>
 
       {/* Task Details Modal */}
-      <dialog id="task-details-modal" className="modal">
-        <div className="modal-box">
-          <h3 className="font-bold text-lg mb-4">Edit Task</h3>
-          <TaskForm 
-            onSubmit={handleEditTask}
-            initialData={selectedTask}
-            modalId="task-details-modal"
-            mode="edit"
-          />
-        </div>
-      </dialog>
+      <TaskDetailsModal 
+        task={selectedTask}
+        onEdit={handleEditClick}
+        onDelete={deleteTask}
+      />
     </div>
   );
 } 
