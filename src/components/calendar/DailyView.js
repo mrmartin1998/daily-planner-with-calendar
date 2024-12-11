@@ -108,6 +108,34 @@ export default function DailyView({ selectedDate, tasks, onTaskClick }) {
     return d1.getHours() === d2.getHours();
   };
 
+  const calculateTaskPositions = (tasks) => {
+    if (!tasks.length) return [];
+    
+    // Sort tasks by start time and then by title
+    const sortedTasks = [...tasks].slice(0, MAX_VISIBLE_TASKS).sort((a, b) => {
+      const timeA = getTaskTime(a);
+      const timeB = getTaskTime(b);
+      const timeDiff = timeA.getTime() - timeB.getTime();
+      return timeDiff === 0 ? a.title.localeCompare(b.title) : timeDiff;
+    });
+
+    // For simplicity, just assign positions sequentially
+    return sortedTasks.map((task, index) => ({
+      task,
+      position: index,
+      total: sortedTasks.length
+    }));
+  };
+
+  const isOverlapping = (task1, task2) => {
+    const time1 = getTaskTime(task1);
+    const time2 = getTaskTime(task2);
+    const diffInMinutes = Math.abs(time1.getTime() - time2.getTime()) / (1000 * 60);
+    return diffInMinutes < 30; // Tasks within 30 minutes are considered overlapping
+  };
+
+  const MAX_VISIBLE_TASKS = 4;
+
   return (
     <div className="grid grid-cols-[80px_1fr] gap-2">
       {/* Time labels column */}
@@ -157,6 +185,8 @@ export default function DailyView({ selectedDate, tasks, onTaskClick }) {
             return taskTime && taskTime.getHours() === hour;
           });
 
+          const taskPositions = calculateTaskPositions(hourTasks);
+
           return (
             <div 
               key={`slot-${hour}`}
@@ -167,22 +197,33 @@ export default function DailyView({ selectedDate, tasks, onTaskClick }) {
               `}
               onClick={() => handleTimeSlotClick(hour)}
             >
-              {hourTasks.map((task) => {
+              {taskPositions.map(({ task, position, total }) => {
                 const category = getTaskCategory(task.categoryId);
                 const status = getTaskStatus(task);
+                const width = `${100 / total}%`;
+                const left = `${(position * 100) / total}%`;
                 
                 return (
                   <div
                     key={task.id}
-                    className={`absolute inset-x-0 mx-1 my-1 rounded-lg p-2 shadow-sm text-sm hover:ring-2 hover:ring-primary/50 cursor-pointer
+                    className={`absolute mx-0.5 my-0.5 rounded-lg p-2 shadow-sm text-sm hover:ring-2 hover:ring-primary/50 cursor-pointer group
                       ${status === 'overdue' ? 'border-error border-2' : ''}
                       ${status === 'upcoming' ? 'border-warning border-2' : ''}
+                      transition-all duration-200
                     `}
+                    title={`${task.title} - ${format(getTaskTime(task), 'HH:mm')}`}
                     style={{
                       backgroundColor: category ? `${category.color}20` : 'hsl(var(--p) / 0.1)',
-                      borderLeft: category ? `3px solid ${category.color}` : '3px solid hsl(var(--p))'
+                      borderLeft: category ? `3px solid ${category.color}` : '3px solid hsl(var(--p))',
+                      width: `calc(${100 / total}% - 8px)`,
+                      left: `calc(${(position * 100) / total}% + 4px)`,
+                      zIndex: position + 1,
+                      height: 'calc(100% - 4px)'
                     }}
-                    onClick={(e) => onTaskClick(e, task)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onTaskClick(e, task);
+                    }}
                   >
                     <h4 className="font-medium truncate flex items-center gap-1">
                       {task.title}
@@ -191,9 +232,24 @@ export default function DailyView({ selectedDate, tasks, onTaskClick }) {
                     <p className="text-xs text-base-content/70">
                       {format(getTaskTime(task), 'HH:mm')}
                     </p>
+                    {taskPositions.length > MAX_VISIBLE_TASKS && (
+                      <div 
+                        className="absolute right-1 bottom-1 text-xs text-base-content/70 bg-base-100 px-1 rounded"
+                        style={{ zIndex: taskPositions.length + 1 }}
+                      >
+                        +{taskPositions.length - MAX_VISIBLE_TASKS} more
+                      </div>
+                    )}
                   </div>
                 );
               })}
+              {hourTasks.length > MAX_VISIBLE_TASKS && (
+                <div 
+                  className="absolute right-2 top-2 text-xs font-medium bg-base-300/90 px-2 py-0.5 rounded-full shadow-sm z-50"
+                >
+                  +{hourTasks.length - MAX_VISIBLE_TASKS} more
+                </div>
+              )}
             </div>
           );
         })}
