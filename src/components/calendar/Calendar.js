@@ -15,12 +15,14 @@ import DailyView from './DailyView';
 import WeekView from './WeekView';
 import MonthView from './MonthView';
 import TaskForm from '../tasks/TaskForm';
+import TaskDetailsModal from '../tasks/TaskDetailsModal';
 
 export default function Calendar() {
-  const { tasks, createTask } = useTaskContext();
+  const { tasks, createTask, deleteTask } = useTaskContext();
   const [selectedDate, setSelectedDate] = useState(startOfToday());
   const [view, setView] = useState('daily');
   const [slotInitialData, setSlotInitialData] = useState(null);
+  const [selectedTask, setSelectedTask] = useState(null);
 
   useEffect(() => {
     const handleSlotClick = (event) => {
@@ -74,6 +76,17 @@ export default function Calendar() {
       default:
         return format(selectedDate, 'MMMM d, yyyy');
     }
+  };
+
+  const handleTaskClick = (e, task) => {
+    e.stopPropagation(); // Prevent triggering the time slot click
+    setSelectedTask(task);
+    document.getElementById('task-details-modal').showModal();
+  };
+
+  const handleEditTask = (task) => {
+    setSlotInitialData(task);
+    document.getElementById('calendar-task-modal').showModal();
   };
 
   return (
@@ -134,7 +147,13 @@ export default function Calendar() {
       {/* Calendar Content */}
       <div className="flex-1 bg-base-200 rounded-lg p-4 overflow-hidden">
         <div className="transition-all duration-300 ease-in-out">
-          {view === 'daily' && <DailyView selectedDate={selectedDate} tasks={tasks} />}
+          {view === 'daily' && (
+            <DailyView 
+              selectedDate={selectedDate} 
+              tasks={tasks} 
+              onTaskClick={handleTaskClick}
+            />
+          )}
           {view === 'weekly' && <WeekView selectedDate={selectedDate} tasks={tasks} />}
           {view === 'monthly' && <MonthView selectedDate={selectedDate} tasks={tasks} />}
         </div>
@@ -151,6 +170,13 @@ export default function Calendar() {
           />
         </div>
       </dialog>
+
+      {/* Task Details Modal */}
+      <TaskDetailsModal 
+        task={selectedTask}
+        onEdit={handleEditTask}
+        onDelete={deleteTask}
+      />
     </div>
   );
 } 

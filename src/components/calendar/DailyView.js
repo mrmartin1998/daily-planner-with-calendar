@@ -2,7 +2,7 @@
 import { format, isSameDay, parseISO, isValid, isPast, addMinutes, isWithinInterval } from 'date-fns';
 import { useTaskContext } from '@/context/TaskContext';
 
-export default function DailyView({ selectedDate, tasks }) {
+export default function DailyView({ selectedDate, tasks, onTaskClick }) {
   const { categories, createTask } = useTaskContext();
   const hours = Array.from({ length: 24 }, (_, i) => i);
   
@@ -134,7 +134,7 @@ export default function DailyView({ selectedDate, tasks }) {
                 return (
                   <div
                     key={task.id}
-                    className={`absolute inset-x-0 mx-1 my-1 rounded-lg p-2 shadow-sm text-sm
+                    className={`absolute inset-x-0 mx-1 my-1 rounded-lg p-2 shadow-sm text-sm hover:ring-2 hover:ring-primary/50 cursor-pointer
                       ${status === 'overdue' ? 'border-error border-2' : ''}
                       ${status === 'upcoming' ? 'border-warning border-2' : ''}
                     `}
@@ -142,6 +142,7 @@ export default function DailyView({ selectedDate, tasks }) {
                       backgroundColor: category ? `${category.color}20` : 'hsl(var(--p) / 0.1)',
                       borderLeft: category ? `3px solid ${category.color}` : '3px solid hsl(var(--p))'
                     }}
+                    onClick={(e) => onTaskClick(e, task)}
                   >
                     <h4 className="font-medium truncate flex items-center gap-1">
                       {task.title}
