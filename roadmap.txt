@@ -72,9 +72,9 @@ Learning Objectives:
 4. Calendar Implementation
    a. Core Calendar Features
       - Click-to-add task functionality ✓
-      - Task details popup on click ⏳
+      - Task details popup on click ✓
       - Drag-and-drop task rescheduling ⏳
-      - View transitions and animations ⏳
+      - View transitions and animations ✓
    
    b. Daily View Enhancements
       - Time slot hover effects ⏳
