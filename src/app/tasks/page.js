@@ -25,7 +25,6 @@ export default function TasksPage() {
   };
 
   const openEditModal = (task) => {
-    console.log('Opening edit modal with task:', task);
     setEditingTask(task);
     document.getElementById('task-modal').showModal();
   };
@@ -55,7 +54,8 @@ export default function TasksPage() {
           <h3 className="font-bold text-lg mb-4">{editingTask ? 'Edit Task' : 'Create New Task'}</h3>
           <TaskForm 
             onSubmit={editingTask ? handleEditTask : handleCreateTask} 
-            initialData={editingTask} 
+            initialData={editingTask}
+            mode={editingTask ? 'edit' : 'create'} 
           />
         </div>
       </dialog>
