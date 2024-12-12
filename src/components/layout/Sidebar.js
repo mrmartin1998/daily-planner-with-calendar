@@ -15,7 +15,6 @@ export default function Sidebar() {
           <li><Link href="/">Dashboard</Link></li>
           <li><Link href="/calendar">Calendar</Link></li>
           <li><Link href="/tasks">Tasks</Link></li>
-          <li><Link href="/reminders">Reminders</Link></li>
         </ul>
       </div>
     </div>
